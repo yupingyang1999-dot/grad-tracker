@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>碩士申請追蹤板 — Phoebe & Yolanda</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1117;--bg2:#181c26;--bg3:#1e2333;--bg4:#252a3a;
+  --border:#2e3347;--border2:#3a4060;
+  --text:#e8eaf0;--text2:#9aa0b8;--text3:#6b7290;
+  --ph:#1D9E75;--ph-bg:#0d2e24;--ph-txt:#5DCAA5;
+  --yo:#378ADD;--yo-bg:#0d1e38;--yo-txt:#85B7EB;
+  --amber-bg:#2e1e05;--amber-txt:#EF9F27;
+  --red-bg:#2e0d0d;--red-txt:#E24B4A;
+  --success-bg:#0d2e24;--success-txt:#5DCAA5;
+  --info-bg:#0d1e38;--info-txt:#85B7EB;
+  --warn-bg:#2e1e05;--warn-txt:#EF9F27;
+  --danger-bg:#2e0d0d;--danger-txt:#E24B4A;
+  --radius:10px;--radius-sm:7px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;}
+a{color:var(--ph-txt);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+.app{max-width:1060px;margin:0 auto;padding:2rem 1.25rem;}
+
+/* api key banner */
+.api-banner{background:var(--amber-bg);border:1px solid var(--amber-txt);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:1.5rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.api-banner p{font-size:13px;color:var(--amber-txt);flex:1;}
+.api-banner input{font-size:13px;padding:7px 11px;border-radius:var(--radius-sm);border:1px solid var(--amber-txt);background:var(--bg);color:var(--text);width:320px;outline:none;}
+.api-banner button{padding:7px 14px;border:none;border-radius:var(--radius-sm);background:var(--amber-txt);color:#1a0e00;font-size:13px;font-weight:600;cursor:pointer;}
+
+/* topbar */
+.topbar{display:flex;align-items:center;gap:12px;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.logo-badge{width:36px;height:36px;border-radius:10px;background:var(--ph);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.logo-badge svg{width:20px;height:20px;}
+.logo-text h1{font-size:17px;font-weight:600;letter-spacing:-.3px;}
+.logo-text p{font-size:12px;color:var(--text2);margin-top:1px;}
+.season-tag{font-size:12px;padding:4px 12px;border-radius:20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.user-tabs{display:flex;gap:6px;margin-left:auto;}
+.utab{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;font-size:13px;font-weight:500;background:var(--bg2);color:var(--text2);transition:all .15s;user-select:none;}
+.utab:hover{border-color:var(--border2);color:var(--text);}
+.utab.active-ph{background:var(--ph-bg);border-color:var(--ph);color:var(--ph-txt);}
+.utab.active-yo{background:var(--yo-bg);border-color:var(--yo);color:var(--yo-txt);}
+.avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:600;flex-shrink:0;}
+.av-ph{background:var(--ph);}.av-yo{background:var(--yo);}
+
+/* view tabs */
+.view-toggle{display:flex;gap:6px;margin-bottom:1.5rem;align-items:center;}
+.vtab{padding:7px 16px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border);background:none;color:var(--text2);transition:all .15s;}
+.vtab:hover{border-color:var(--border2);color:var(--text);}
+.vtab.on{border-color:var(--border2);background:var(--bg3);color:var(--text);}
+.peek-badge{font-size:11px;padding:2px 8px;border-radius:20px;margin-left:4px;vertical-align:middle;}
+.peek-ph{background:var(--ph-bg);color:var(--ph-txt);}
+.peek-yo{background:var(--yo-bg);color:var(--yo-txt);}
+
+/* stats */
+.stats-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:1.5rem;}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;}
+.stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.stat-val{font-size:22px;font-weight:600;}
+.c-green{color:var(--ph);}.c-blue{color:#378ADD;}.c-amber{color:var(--amber-txt);}.c-red{color:var(--red-txt);}
+
+/* toolbar */
+.toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center;}
+.toolbar input,.toolbar select{font-size:13px;padding:8px 12px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text);outline:none;}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--border2);}
+.toolbar select option{background:var(--bg2);}
+.add-btn{margin-left:auto;padding:8px 18px;height:36px;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;color:white;transition:opacity .15s;}
+.add-btn:hover{opacity:.85;}
+.add-btn-ph{background:var(--ph);}.add-btn-yo{background:var(--yo);}
+
+/* col headers */
+.col-hdrs{display:grid;grid-template-columns:2fr 1.3fr .85fr .85fr 1.1fr 110px;gap:14px;padding:0 16px;margin-bottom:6px;}
+.col-hdrs span{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;}
+
+/* school card */
+.school-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:grid;grid-template-columns:2fr 1.3fr .85fr .85fr 1.1fr 110px;align-items:center;gap:14px;margin-bottom:8px;transition:border-color .15s;}
+.school-card:hover{border-color:var(--border2);}
+.school-card.ph-card{border-left:3px solid var(--ph);}
+.school-card.yo-card{border-left:3px solid var(--yo);}
+.school-card.readonly{opacity:.82;}
+.s-name{font-size:13px;font-weight:600;}
+.s-dept{font-size:12px;color:var(--text2);margin-top:2px;}
+.s-country{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin-top:4px;background:var(--bg3);color:var(--text3);border:1px solid var(--border);}
+.s-link{font-size:11px;color:var(--ph-txt);margin-top:3px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;}
+.dl-val{font-size:13px;font-weight:500;}
+.dl-rem{font-size:11px;color:var(--text3);margin-top:2px;}
+.dl-rem.soon{color:var(--amber-txt);}
+.dl-rem.urgent{color:var(--red-txt);}
+.dl-rem.passed{color:var(--red-txt);}
+.lang-main{font-size:13px;font-weight:500;}
+.lang-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.bar-wrap{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-bottom:4px;}
+.bar-fill{height:100%;border-radius:3px;transition:width .3s;}
+.bar-ph{background:var(--ph);}.bar-yo{background:#378ADD;}
+.bar-lbl{font-size:11px;color:var(--text3);}
+.badge{display:inline-flex;align-items:center;font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;}
+.b-planning{background:var(--bg3);color:var(--text2);}
+.b-in-progress{background:var(--info-bg);color:var(--info-txt);}
+.b-submitted{background:var(--success-bg);color:var(--success-txt);}
+.b-accepted{background:var(--success-bg);color:var(--success-txt);}
+.b-rejected{background:var(--danger-bg);color:var(--danger-txt);}
+.b-interviewing{background:var(--warn-bg);color:var(--warn-txt);}
+.act-col{display:flex;gap:5px;justify-content:flex-end;}
+.ibtn{width:28px;height:28px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:12px;transition:all .1s;}
+.ibtn:hover{background:var(--bg3);color:var(--text);}
+.readonly-lbl{font-size:11px;color:var(--text3);}
+
+/* fee/faculty info on card */
+.extra-info{font-size:11px;color:var(--text3);margin-top:3px;}
+
+/* readonly banner */
+.readonly-banner{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 16px;font-size:13px;color:var(--text2);margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+
+/* overview */
+.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.ov-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.ov-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.ov-header h3{font-size:14px;font-weight:600;}
+.ov-mini{padding:10px 12px;border-radius:var(--radius-sm);margin-bottom:7px;background:var(--bg3);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ov-mini:last-child{margin-bottom:0;}
+.ov-school{font-size:13px;font-weight:500;}
+.ov-dept{font-size:11px;color:var(--text2);margin-top:2px;}
+.empty{text-align:center;padding:2.5rem;color:var(--text3);font-size:14px;}
+
+/* modal */
+.modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
+.modal-wrap.open{display:flex;}
+.modal{background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border2);padding:26px;width:560px;max-width:100%;}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:6px;}
+.modal-subtitle{font-size:12px;color:var(--text3);margin-bottom:20px;}
+
+/* url fetch area */
+.url-row{display:flex;gap:8px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.url-row input{flex:1;font-size:13px;padding:9px 11px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg3);color:var(--text);outline:none;}
+.url-row input:focus{border-color:var(--border2);}
+.fetch-btn{padding:9px 16px;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;color:white;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:opacity .15s;}
+.fetch-btn:hover{opacity:.85;}
+.fetch-btn:disabled{opacity:.5;cursor:not-allowed;}
+.fetch-ph{background:var(--ph);}.fetch-yo{background:#378ADD;}
+
+.fetch-status{font-size:12px;padding:8px 12px;border-radius:var(--radius-sm);margin-bottom:14px;display:none;}
+.fetch-status.loading{display:block;background:var(--info-bg);color:var(--info-txt);}
+.fetch-status.success{display:block;background:var(--success-bg);color:var(--success-txt);}
+.fetch-status.error{display:block;background:var(--danger-bg);color:var(--danger-txt);}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg label{font-size:12px;color:var(--text2);}
+.fg input,.fg select,.fg textarea{font-size:13px;padding:9px 11px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg3);color:var(--text);width:100%;outline:none;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--border2);}
+.fg textarea{resize:vertical;min-height:68px;}
+.fg select option{background:var(--bg2);}
+.fg input.autofilled{border-color:var(--ph);background:var(--ph-bg);}
+
+.sec-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin:14px 0 8px;}
+.doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-bottom:4px;}
+.doc-item{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 0;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text2);}
+.doc-item:hover{color:var(--text);}
+.doc-item input[type=checkbox]{accent-color:var(--ph);width:14px;height:14px;cursor:pointer;flex-shrink:0;}
+
+.mfooter{display:flex;justify-content:flex-end;gap:8px;margin-top:20px;}
+.btn-cancel{padding:9px 16px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;color:var(--text2);font-size:13px;cursor:pointer;}
+.btn-cancel:hover{border-color:var(--border2);color:var(--text);}
+.btn-save{padding:9px 18px;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;color:white;transition:opacity .15s;}
+.btn-save:hover{opacity:.85;}
+.btn-save-ph{background:var(--ph);}.btn-save-yo{background:#378ADD;}
+
+/* spinner */
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+
+@media(max-width:680px){
+  .stats-row{grid-template-columns:repeat(3,1fr);}
+  .school-card,.col-hdrs{grid-template-columns:1fr;}
+  .col-hdrs{display:none;}
+  .overview-grid{grid-template-columns:1fr;}
+  .user-tabs{width:100%;}
+  .utab{flex:1;justify-content:center;}
+  .url-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="api-banner" id="apiBanner">
+    <p>🔒 安全版 AI grad tracker：目前已改成自動儲存到瀏覽器 localStorage。AI 抓取功能的介面位置已保留，但不再於前端直接輸入 API Key。</p>
+  </div>
+
+  <div class="topbar">
+    <div class="logo-badge">
+      <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L3 6v8l7 4 7-4V6L10 2z" stroke="white" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" fill="white"/></svg>
+    </div>
+    <div class="logo-text">
+      <h1>碩士申請追蹤板</h1>
+      <p>2027 / 2028 申請季</p>
+    </div>
+    <span class="season-tag">2026 年起開始申請</span>
+    <div class="user-tabs">
+      <div class="utab active-ph" id="tab-ph" onclick="switchUser('ph')">
+        <div class="avatar av-ph">P</div>Phoebe
+      </div>
+      <div class="utab" id="tab-yo" onclick="switchUser('yo')">
+        <div class="avatar av-yo">Y</div>Yolanda
+      </div>
+    </div>
+  </div>
+
+  <div id="mainContent"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-wrap" id="modalWrap">
+  <div class="modal">
+    <h2 id="mTitle">新增申請學校</h2>
+    <p class="modal-subtitle">貼上申請頁面網址，AI 將自動抓取相關資訊</p>
+
+    <div class="url-row">
+      <input id="f-url" placeholder="貼上學校申請頁面網址，例如 https://www.cs.cmu.edu/academics/masters/..."/>
+      <button class="fetch-btn" id="fetchBtn" onclick="fetchFromUrl()">
+        <span id="fetchBtnText">✦ AI 抓取</span>
+      </button>
+    </div>
+    <div class="fetch-status" id="fetchStatus"></div>
+
+    <div class="form-row">
+      <div class="fg" style="grid-column:1/-1;"><label>學校名稱</label><input id="f-school" placeholder="e.g. Carnegie Mellon University"/></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>科系 / 學程</label><input id="f-dept" placeholder="e.g. MS in Computer Science"/></div>
+      <div class="fg"><label>國家</label>
+        <select id="f-country">
+          <option>美國</option><option>英國</option><option>加拿大</option><option>澳洲</option>
+          <option>新加坡</option><option>日本</option><option>荷蘭</option><option>德國</option>
+          <option>瑞士</option><option>法國</option><option>其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>申請截止日期</label><input type="date" id="f-deadline"/></div>
+      <div class="fg"><label>申請狀態</label>
+        <select id="f-status">
+          <option value="planning">計劃中</option>
+          <option value="in-progress">進行中</option>
+          <option value="submitted">已送出</option>
+          <option value="accepted">錄取</option>
+          <option value="rejected">拒絕</option>
+          <option value="interviewing">面試中</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>語言考試</label>
+        <select id="f-lang"><option>TOEFL</option><option>IELTS</option><option>Duolingo</option><option>無需求</option></select>
+      </div>
+      <div class="fg"><label>最低門檻分數</label><input id="f-langreq" placeholder="e.g. 100 / 7.0"/></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>申請費用</label><input id="f-fee" placeholder="e.g. USD $75"/></div>
+      <div class="fg"><label>指導教授 / 備註</label><input id="f-faculty" placeholder="e.g. Prof. Smith, 研究方向 ML"/></div>
+    </div>
+    <div class="fg" style="margin-bottom:4px;"><label>額外備註</label><textarea id="f-note" placeholder="獎學金資訊、特殊要求、面試說明..."></textarea></div>
+
+    <div class="sec-lbl">所需文件</div>
+    <div class="doc-grid" id="docGrid"></div>
+
+    <div class="mfooter">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-save" id="btnSave" onclick="saveEntry()">儲存</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const DOCS = ['讀書計畫 (SOP)','動機信 (Motivation Letter)','推薦信 (LOR)','履歷 (CV/Resume)','成績單','畢業證書','語言成績單','作品集 / 寫作樣本','GRE / GMAT 成績','申請費用收據'];
+const STATUS_MAP = {
+  'planning':['b-planning','計劃中'],
+  'in-progress':['b-in-progress','進行中'],
+  'submitted':['b-submitted','已送出'],
+  'accepted':['b-accepted','錄取'],
+  'rejected':['b-rejected','拒絕'],
+  'interviewing':['b-interviewing','面試中']
+};
+
+const STORAGE_KEY = 'grad_tracker_v2_data';
+const UI_KEY = 'grad_tracker_v2_ui';
+
+const DEFAULT_DB = {
+  ph:[
+    {school:'Columbia University',dept:'MS in Computer Science',country:'美國',deadline:'2026-12-01',status:'in-progress',lang:'TOEFL',langreq:'100',fee:'USD $85',faculty:'Prof. Eugene Wu (DB)',note:'Columbia 不需要 GRE',url:'',docs:[true,false,true,true,true,false,true,false,false,false]},
+    {school:'University of Edinburgh',dept:'MSc Artificial Intelligence',country:'英國',deadline:'2027-01-15',status:'planning',lang:'IELTS',langreq:'7.0',fee:'£30',faculty:'',note:'',url:'',docs:[false,false,false,true,true,false,false,false,false,false]},
+    {school:'National University of Singapore',dept:'MS in Computer Science',country:'新加坡',deadline:'2027-02-28',status:'planning',lang:'TOEFL',langreq:'85',fee:'SGD $20',faculty:'',note:'',url:'',docs:[false,false,false,true,true,false,false,false,false,false]},
+  ],
+  yo:[
+    {school:'University of Toronto',dept:'MEng Electrical & Computer Engineering',country:'加拿大',deadline:'2027-01-31',status:'in-progress',lang:'TOEFL',langreq:'93',fee:'CAD $110',faculty:'Prof. Ashish Khisti',note:'需提供兩封推薦信',url:'',docs:[true,false,true,true,true,false,true,false,false,false]},
+    {school:'Imperial College London',dept:'MSc Data Science',country:'英國',deadline:'2026-11-30',status:'planning',lang:'IELTS',langreq:'6.5',fee:'£30',faculty:'',note:'',url:'',docs:[false,false,false,true,true,false,false,false,false,false]},
+    {school:'ETH Zurich',dept:'MSc Computer Science',country:'瑞士',deadline:'2026-12-15',status:'planning',lang:'TOEFL',langreq:'95',fee:'免費',faculty:'',note:'學費全免，需財力證明',url:'',docs:[false,false,false,true,true,false,false,false,false,false]},
+  ]
+};
+
+let currentUser = 'ph';
+let currentView = 'my';
+let editIdx = -1;
+let DB = { ph: [], yo: [] };
+
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function normalizeEntry(entry) {
+  const docs = Array.isArray(entry.docs) ? entry.docs.slice(0, DOCS.length) : [];
+  while (docs.length < DOCS.length) docs.push(false);
+  return {
+    school: entry.school || '未命名學校',
+    dept: entry.dept || '未填科系',
+    country: entry.country || '其他',
+    deadline: entry.deadline || '',
+    status: entry.status || 'planning',
+    lang: entry.lang || 'TOEFL',
+    langreq: entry.langreq || '—',
+    fee: entry.fee || '',
+    faculty: entry.faculty || '',
+    note: entry.note || '',
+    url: entry.url || '',
+    docs
+  };
+}
+
+function normalizeDB(data) {
+  const safe = { ph: [], yo: [] };
+  ['ph', 'yo'].forEach(user => {
+    const arr = Array.isArray(data?.[user]) ? data[user] : [];
+    safe[user] = arr.map(normalizeEntry);
+  });
+  return safe;
+}
+
+function saveDB() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DB));
+}
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      DB = normalizeDB(clone(DEFAULT_DB));
+      saveDB();
+      return;
+    }
+    DB = normalizeDB(JSON.parse(raw));
+  } catch (e) {
+    DB = normalizeDB(clone(DEFAULT_DB));
+    saveDB();
+  }
+}
+
+function saveUIState() {
+  localStorage.setItem(UI_KEY, JSON.stringify({
+    currentUser,
+    currentView
+  }));
+}
+
+function loadUIState() {
+  try {
+    const raw = localStorage.getItem(UI_KEY);
+    if (!raw) return;
+    const ui = JSON.parse(raw);
+    if (ui.currentUser === 'ph' || ui.currentUser === 'yo') currentUser = ui.currentUser;
+    if (['my', 'peer', 'overview'].includes(ui.currentView)) currentView = ui.currentView;
+  } catch (e) {}
+}
+
+function resetAllData() {
+  if (!confirm('確定要把目前所有資料重設成預設範例嗎？此動作無法復原。')) return;
+  DB = normalizeDB(clone(DEFAULT_DB));
+  saveDB();
+  render();
+}
+
+function exportData() {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    data: DB
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'grad-tracker-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      DB = normalizeDB(parsed.data || parsed);
+      saveDB();
+      render();
+      alert('已成功匯入資料。');
+    } catch (e) {
+      alert('匯入失敗：檔案格式不正確。');
+    } finally {
+      event.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── helpers ──
+function daysUntil(d) {
+  if (!d) return null;
+  const t = new Date(d), n = new Date(); n.setHours(0,0,0,0);
+  return Math.round((t - n) / 86400000);
+}
+function deadlineUI(dateStr) {
+  if (!dateStr) return {val:'—', rem:'', cls:'dl-rem'};
+  const d = daysUntil(dateStr);
+  const val = dateStr.replace(/-/g, '/');
+  let rem = '', cls = 'dl-rem';
+  if (d < 0) { rem = '已截止'; cls += ' passed'; }
+  else if (d === 0) { rem = '今天截止！'; cls += ' urgent'; }
+  else if (d <= 7) { rem = `還有 ${d} 天`; cls += ' urgent'; }
+  else if (d <= 30) { rem = `還有 ${d} 天`; cls += ' soon'; }
+  else rem = `還有 ${d} 天`;
+  return {val, rem, cls};
+}
+function statsFor(entries) {
+  return {
+    total: entries.length,
+    submitted: entries.filter(e => ['submitted','accepted'].includes(e.status)).length,
+    accepted: entries.filter(e => e.status === 'accepted').length,
+    upcoming: entries.filter(e => { const d = daysUntil(e.deadline); return d !== null && d >= 0 && d <= 30; }).length,
+    urgent: entries.filter(e => { const d = daysUntil(e.deadline); return d !== null && d >= 0 && d <= 7; }).length,
+  };
+}
+
+// ── AI placeholder (safe) ──
+function fetchFromUrl() {
+  showFetchStatus('error', '目前是安全版靜態網站：已停用前端直接輸入 API Key。之後可接 Vercel / Cloudflare Workers 後端再啟用 AI 抓取。');
+}
+
+// ── render ──
+function renderStats(entries) {
+  const s = statsFor(entries);
+  return `<div class="stats-row">
+    <div class="stat"><div class="stat-lbl">追蹤學校</div><div class="stat-val">${s.total}</div></div>
+    <div class="stat"><div class="stat-lbl">已送出</div><div class="stat-val c-blue">${s.submitted}</div></div>
+    <div class="stat"><div class="stat-lbl">錄取</div><div class="stat-val c-green">${s.accepted}</div></div>
+    <div class="stat"><div class="stat-lbl">30天內截止</div><div class="stat-val c-amber">${s.upcoming}</div></div>
+    <div class="stat"><div class="stat-lbl">緊急（7天）</div><div class="stat-val c-red">${s.urgent}</div></div>
+  </div>`;
+}
+
+function renderCard(entry, idx, user, readonly) {
+  const dl = deadlineUI(entry.deadline);
+  const [bCls, bLabel] = STATUS_MAP[entry.status] || ['b-planning','計劃中'];
+  const done = entry.docs.filter(Boolean).length;
+  const pct = Math.round(done / entry.docs.length * 100);
+  const urlHtml = entry.url ? `<a class="s-link" href="${entry.url}" target="_blank" onclick="event.stopPropagation()">↗ 申請頁面</a>` : '';
+  const feeHtml = entry.fee ? `<div class="extra-info">💳 ${entry.fee}</div>` : '';
+  const facultyHtml = entry.faculty ? `<div class="extra-info">👤 ${entry.faculty}</div>` : '';
+  const noteHtml = entry.note ? `<div class="extra-info">📝 ${entry.note}</div>` : '';
+
+  const actions = readonly
+    ? `<div class="act-col"><span class="readonly-lbl">唯讀</span></div>`
+    : `<div class="act-col">
+        <button class="ibtn" onclick="openEdit(${idx})" title="編輯">✎</button>
+        <button class="ibtn" onclick="delEntry(${idx})" title="刪除">✕</button>
+      </div>`;
+
+  return `<div class="school-card ${user}-card${readonly?' readonly':''}">
+    <div>
+      <div class="s-name">${entry.school}</div>
+      <div class="s-dept">${entry.dept}</div>
+      <span class="s-country">${entry.country}</span>
+      ${urlHtml}${feeHtml}${facultyHtml}${noteHtml}
+    </div>
+    <div>
+      <div class="dl-val">${dl.val}</div>
+      <div class="${dl.cls}">${dl.rem}</div>
+    </div>
+    <div>
+      <div class="lang-main">${entry.lang}</div>
+      <div class="lang-sub">最低 ${entry.langreq || '—'}</div>
+    </div>
+    <div>
+      <div class="bar-wrap"><div class="bar-fill bar-${user}" style="width:${pct}%"></div></div>
+      <div class="bar-lbl">${done}/${entry.docs.length} 文件</div>
+    </div>
+    <div><span class="badge ${bCls}">${bLabel}</span></div>
+    ${actions}
+  </div>`;
+}
+
+function renderOverview() {
+  let html = `<div class="overview-grid">`;
+  for (const [u, entries] of [['ph', DB.ph],['yo', DB.yo]]) {
+    const name = u === 'ph' ? 'Phoebe' : 'Yolanda';
+    html += `<div class="ov-panel" style="border-top:2px solid var(--${u});">
+      <div class="ov-header">
+        <div class="avatar av-${u}">${name[0]}</div>
+        <h3>${name} 的申請</h3>
+        <span style="margin-left:auto;font-size:12px;color:var(--text3);">${entries.length} 所學校</span>
+      </div>`;
+    if (entries.length === 0) html += `<div class="empty">尚未新增學校</div>`;
+    else entries.forEach(e => {
+      const [bCls, bLabel] = STATUS_MAP[e.status] || ['b-planning','計劃中'];
+      const dl = deadlineUI(e.deadline);
+      html += `<div class="ov-mini">
+        <div><div class="ov-school">${e.school}</div><div class="ov-dept">${e.dept} · ${e.country}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">
+          <span class="badge ${bCls}" style="font-size:11px;padding:2px 8px;">${bLabel}</span>
+          <span style="font-size:11px;color:var(--text3);">${dl.val}</span>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function render() {
+  saveUIState();
+  const peer = currentUser === 'ph' ? 'yo' : 'ph';
+  const peerName = peer === 'ph' ? 'Phoebe' : 'Yolanda';
+  const myData = DB[currentUser];
+  const peerData = DB[peer];
+
+  let html = `<div class="view-toggle">
+    <button class="vtab${currentView==='my'?' on':''}" onclick="setView('my')">我的申請</button>
+    <button class="vtab${currentView==='peer'?' on':''}" onclick="setView('peer')">
+      查看 ${peerName} <span class="peek-badge peek-${peer}">${peerData.length} 所</span>
+    </button>
+    <button class="vtab${currentView==='overview'?' on':''}" onclick="setView('overview')">總覽比較</button>
+  </div>`;
+
+  if (currentView === 'my') {
+    html += renderStats(myData);
+    html += `<div class="toolbar">
+      <input type="text" id="searchInput" placeholder="搜尋學校或科系..." style="width:190px;" oninput="renderFiltered()"/>
+      <select id="filterStatus" onchange="renderFiltered()">
+        <option value="">全部狀態</option>
+        <option value="planning">計劃中</option><option value="in-progress">進行中</option>
+        <option value="submitted">已送出</option><option value="accepted">錄取</option>
+        <option value="rejected">拒絕</option><option value="interviewing">面試中</option>
+      </select>
+      <button class="add-btn add-btn-${currentUser}" onclick="openAdd()">+ 新增學校</button>
+      <button class="vtab" onclick="exportData()">匯出備份</button>
+      <label class="vtab" style="display:inline-flex;align-items:center;cursor:pointer;">匯入備份
+        <input type="file" accept="application/json" style="display:none;" onchange="importData(event)"/>
+      </label>
+      <button class="vtab" onclick="resetAllData()">重設範例</button>
+    </div>
+    <div class="readonly-banner" style="margin-top:-4px;">💾 目前版本會自動儲存在瀏覽器 localStorage。重整頁面後資料不會消失。</div>
+    <div class="col-hdrs"><span>學校 / 科系</span><span>截止日期</span><span>語言</span><span>文件</span><span>狀態</span><span></span></div>
+    <div id="cardList">`;
+    if (myData.length === 0) html += `<div class="empty">尚未新增任何學校，點「+ 新增學校」開始！</div>`;
+    else myData.forEach((e, i) => html += renderCard(e, i, currentUser, false));
+    html += `</div>`;
+  } else if (currentView === 'peer') {
+    html += `<div class="readonly-banner">👁 你正在查看 <strong style="color:var(--${peer}-txt);margin:0 4px;">${peerName}</strong> 的申請進度（唯讀）</div>`;
+    html += renderStats(peerData);
+    html += `<div class="col-hdrs"><span>學校 / 科系</span><span>截止日期</span><span>語言</span><span>文件</span><span>狀態</span><span></span></div>`;
+    if (peerData.length === 0) html += `<div class="empty">${peerName} 還沒有新增任何學校。</div>`;
+    else peerData.forEach((e, i) => html += renderCard(e, i, peer, true));
+  } else {
+    html += `<div class="readonly-banner">🤖 AI 抓取功能已保留介面位置，但為了安全性，目前不在前端直接存放 API Key。</div>`;
+    html += renderOverview();
+  }
+
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function renderFiltered() {
+  const searchInput = document.getElementById('searchInput');
+  const filterStatus = document.getElementById('filterStatus');
+  if (!searchInput || !filterStatus) return;
+  const search = searchInput.value.toLowerCase();
+  const status = filterStatus.value;
+  const myData = DB[currentUser];
+  const list = document.getElementById('cardList');
+  const filtered = myData.filter(e =>
+    (!search || e.school.toLowerCase().includes(search) || e.dept.toLowerCase().includes(search)) &&
+    (!status || e.status === status)
+  );
+  if (filtered.length === 0) { list.innerHTML = '<div class="empty">沒有符合條件的學校</div>'; return; }
+  list.innerHTML = filtered.map(e => renderCard(e, myData.indexOf(e), currentUser, false)).join('');
+}
+
+function switchUser(u) {
+  currentUser = u; currentView = 'my';
+  document.getElementById('tab-ph').className = 'utab' + (u==='ph'?' active-ph':'');
+  document.getElementById('tab-yo').className = 'utab' + (u==='yo'?' active-yo':'');
+  saveUIState();
+  render();
+}
+function setView(v) { currentView = v; saveUIState(); render(); }
+
+function buildDocGrid(docs) {
+  return DOCS.map((d, i) =>
+    `<label class="doc-item"><input type="checkbox" id="dc-${i}" ${docs && docs[i] ? 'checked' : ''}/>${d}</label>`
+  ).join('');
+}
+
+function openAdd() {
+  editIdx = -1;
+  const name = currentUser === 'ph' ? 'Phoebe' : 'Yolanda';
+  document.getElementById('mTitle').textContent = `新增申請學校 — ${name}`;
+  document.getElementById('f-url').value = '';
+  document.getElementById('f-school').value = '';
+  document.getElementById('f-dept').value = '';
+  document.getElementById('f-country').value = '美國';
+  document.getElementById('f-deadline').value = '';
+  document.getElementById('f-status').value = 'planning';
+  document.getElementById('f-lang').value = 'TOEFL';
+  document.getElementById('f-langreq').value = '';
+  document.getElementById('f-fee').value = '';
+  document.getElementById('f-faculty').value = '';
+  document.getElementById('f-note').value = '';
+  document.getElementById('fetchStatus').className = 'fetch-status';
+  document.getElementById('fetchStatus').textContent = '';
+  document.getElementById('docGrid').innerHTML = buildDocGrid(null);
+  document.getElementById('fetchBtn').className = 'fetch-btn fetch-' + currentUser;
+  document.getElementById('btnSave').className = 'btn-save btn-save-' + currentUser;
+  document.getElementById('modalWrap').classList.add('open');
+  document.getElementById('modalWrap').scrollTop = 0;
+}
+
+function openEdit(idx) {
+  editIdx = idx;
+  const e = DB[currentUser][idx];
+  document.getElementById('mTitle').textContent = `編輯 — ${e.school}`;
+  document.getElementById('f-url').value = e.url || '';
+  document.getElementById('f-school').value = e.school;
+  document.getElementById('f-dept').value = e.dept;
+  document.getElementById('f-country').value = e.country;
+  document.getElementById('f-deadline').value = e.deadline;
+  document.getElementById('f-status').value = e.status;
+  document.getElementById('f-lang').value = e.lang;
+  document.getElementById('f-langreq').value = e.langreq;
+  document.getElementById('f-fee').value = e.fee || '';
+  document.getElementById('f-faculty').value = e.faculty || '';
+  document.getElementById('f-note').value = e.note || '';
+  document.getElementById('fetchStatus').className = 'fetch-status';
+  document.getElementById('fetchStatus').textContent = '';
+  document.getElementById('docGrid').innerHTML = buildDocGrid(e.docs);
+  document.getElementById('fetchBtn').className = 'fetch-btn fetch-' + currentUser;
+  document.getElementById('btnSave').className = 'btn-save btn-save-' + currentUser;
+  document.getElementById('modalWrap').classList.add('open');
+  document.getElementById('modalWrap').scrollTop = 0;
+}
+
+function closeModal() { document.getElementById('modalWrap').classList.remove('open'); }
+
+function saveEntry() {
+  const entry = normalizeEntry({
+    school: document.getElementById('f-school').value || '未命名學校',
+    dept: document.getElementById('f-dept').value || '未填科系',
+    country: document.getElementById('f-country').value,
+    deadline: document.getElementById('f-deadline').value,
+    status: document.getElementById('f-status').value,
+    lang: document.getElementById('f-lang').value,
+    langreq: document.getElementById('f-langreq').value || '—',
+    fee: document.getElementById('f-fee').value,
+    faculty: document.getElementById('f-faculty').value,
+    note: document.getElementById('f-note').value,
+    url: document.getElementById('f-url').value,
+    docs: DOCS.map((_, i) => document.getElementById('dc-' + i).checked)
+  });
+  if (editIdx >= 0) DB[currentUser][editIdx] = entry;
+  else DB[currentUser].push(entry);
+  saveDB();
+  closeModal();
+  render();
+}
+
+function delEntry(idx) {
+  if (confirm('確定要刪除「' + DB[currentUser][idx].school + '」嗎？')) {
+    DB[currentUser].splice(idx, 1);
+    saveDB();
+    render();
+  }
+}
+
+function showFetchStatus(type, msg) {
+  const el = document.getElementById('fetchStatus');
+  el.className = 'fetch-status ' + type;
+  el.textContent = msg;
+}
+
+// close modal on overlay click
+document.getElementById('modalWrap').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+loadDB();
+loadUIState();
+if (currentUser === 'yo') {
+  document.getElementById('tab-ph').className = 'utab';
+  document.getElementById('tab-yo').className = 'utab active-yo';
+}
+render();
+</script>
+
+</body>
+</html>
